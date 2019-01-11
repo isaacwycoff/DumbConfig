@@ -7,6 +7,7 @@ namespace DumbConfig
 {
 	public class AutoConfig
 	{
+		
 		private readonly Dictionary<Type, Func<string, Object>> ParserLookup =
 			new Dictionary<Type, Func<string, Object>>()
 		{
@@ -67,18 +68,28 @@ namespace DumbConfig
 
 			foreach (var field in type.GetFields())
 			{
+				var nameAttr = field.GetCustomAttributes(
+								typeof(NameAttribute),
+								false).FirstOrDefault() 
+							as NameAttribute;
+
 				ParseMember(
 					field.FieldType,
-					field.Name,
+					nameAttr?.Name ?? field.Name,
 					v => field.SetValue(this, v)
 				);
 			}
 
 			foreach (var prop in type.GetProperties())
 			{
+				var nameAttr = prop.GetCustomAttributes(
+								typeof(NameAttribute),
+								false).FirstOrDefault()
+							as NameAttribute;
+
 				ParseMember(
 					prop.PropertyType,
-					prop.Name,
+					nameAttr?.Name ?? prop.Name,
 					v => prop.SetMethod.Invoke(this, new object[] { v })
 				);
 			}
